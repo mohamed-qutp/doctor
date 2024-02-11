@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Statistic;
 
 use App\Models\User;
+use Carbon\Carbon;
 use App\Models\Article;
 use App\Models\Country;
 use App\Models\Category;
@@ -60,5 +61,49 @@ class StatisticController extends Controller
         return $this->setCode(200)->setMessage('Successe')->setData(['articles_statistic'=>$articles_statistic, 'articles_count'=>$articles_count])->send();
     }
 
+    public function userdate(Request $request)
+    {
+        $users_count = User::all()->count();
+        // Users created last week
+        if ($request->filter == 'weekly')
+        {
+            $month = $request->month; // February (as an example)
+            $year = $request->year;
 
+            // Define the start and end dates of the month
+            $startDate = Carbon::create($year, $month, 1)->startOfMonth();
+            $endDate = Carbon::create($year, $month, 1)->endOfMonth();
+
+            // Initialize an array to store users for each week
+            $users = [];
+
+            // Iterate through each week of the month and filter users
+            for ($week = 1; $week <= 4; $week++)
+            {
+                $startOfWeek = $startDate->copy()->addWeeks($week - 1)->startOfWeek();
+                $endOfWeek = $startDate->copy()->addWeeks($week - 1)->endOfWeek();
+
+                // Get users created within the specified week
+                $users["Week $week"] = User::whereBetween('created_at', [$startOfWeek, $endOfWeek])->count();
+
+            }
+        }
+        if ($request->filter == 'yearly') {
+            $year = $request->year; // Specify the year (as an example)
+
+            // Initialize an array to store users for each month
+            $users = [];
+
+            // Iterate through each month of the year and filter users
+            for ($month = 1; $month <= 12; $month++) {
+                // Define the start and end dates of the month
+                $startDate = Carbon::create($year, $month, 1)->startOfMonth();
+                $endDate = Carbon::create($year, $month, 1)->endOfMonth();
+
+                // Get users created within the specified month
+                $users[Carbon::create($year, $month, 1)->format('M')] = User::whereBetween('created_at', [$startDate, $endDate])->count();
+            }
+        }
+        return $this->setCode(200)->setMessage('Successe')->setData(['users'=>$users, 'users_count' => $users_count])->send();
+    }
 }

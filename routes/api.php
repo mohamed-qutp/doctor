@@ -60,6 +60,7 @@ Route::group(['middleware' => ["SetLang"]], function () {
             //statistics
             Route::get('/statistic/users',[StatisticController::class,'userStatistcs']);
             Route::get('/statistic/articles',[StatisticController::class,'articleStatistics']);
+            Route::post('/statistic/userdate', [StatisticController::class, 'userdate']);
             //Consultations
             Route::post('/statues/store',[ConsultationController::class,'store']);
             Route::get('/statues',[ConsultationController::class,'index']);
